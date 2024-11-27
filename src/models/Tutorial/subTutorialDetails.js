@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const subTutorialDetailsSchema = new mongoose.Schema({
 title:{
   type: String,
-  required: true,
+  required:  [true, "Title is required"],
   unique: true
 },
 content:{
   type: String,
-  required: true
+  required: [true, "Content is required"],
 },
 subTutorial_id:{
   type: mongoose.Schema.Types.ObjectId,
