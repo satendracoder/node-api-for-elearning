@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const {AllGetPosts, createPost, GetPostById, updatePost, deletePost} = require('../controllers/post.controllers');
-const verifyJWT = require('../middlewares/auth.middlewares');
-const adminAccess = require('../middlewares/adminAuth.middlewares');
+const { AllGetPtutorial,
+    createTutorial,
+    updateTutorial, GetTutorialById, deleteTutorial } = require('../../controllers/Tutorial/tutorial.controllers')
+const verifyJWT = require('../../middlewares/auth.middlewares');
+const adminAccess = require('../../middlewares/adminAuth.middlewares');
 
 router.use(verifyJWT)
-router.route("/get-posts").get(AllGetPosts);
-router.route("/get-post/:id").get(GetPostById);
-router.route("/create-post").post(createPost);
-router.route("/update-post/:id").post(updatePost);
-router.route("/delete-post/:id").delete(adminAccess,deletePost);
+router.route("/get-tutorials").get(AllGetPtutorial);
+router.route("/get-tutorial/:id").get(GetTutorialById);
+router.route("/create-tutorial").post(createTutorial);
+router.route("/update-tutorial/:id").post(updateTutorial);
+router.route("/delete-tutorial/:id").delete(adminAccess,deleteTutorial);
 
 module.exports = router;

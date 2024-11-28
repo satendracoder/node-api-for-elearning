@@ -10,7 +10,7 @@ const uploadOnCloudinary = require("../../utils/cloudunary.js");
 //@access private
 const AllGetPtutorial = asyncHandler(async (req, res) => {
     const tutorial = await Tutorial.find({});
-    res.status(200).json({message:"All tutorials you made are here", Total_Tutorial:tutorial.length, tutorial});
+    res.status(200).json({message:"All posts you made are here", Total_Tutorial:tutorial.length, tutorial});
 })
 
 
@@ -18,15 +18,22 @@ const AllGetPtutorial = asyncHandler(async (req, res) => {
 //@router  POST /api/post/create-post
 //@access private
 const createTutorial = asyncHandler(async (req, res) => {
-  const {title,description} = req.body;
-  if([title,description].some((filed)=>filed?.trim()==="")){
+  const {title,description,baiseUrl,keywords,thumbnail,isPublish,contentPost} = req.body;
+  if([title,description,baiseUrl,keywords,thumbnail, isPublish,contentPost].some((filed)=>filed?.trim()==="")){
     res.status(400).json({message:"Please check all filed", createTutorial})
     throw new ApiError(400, "All fields are required");
   }
 
   const tutorial = await Tutorial.create({
     title,
-    description
+    description,
+    baiseUrl,
+    keywords,
+    baiseUrl,
+    thumbnail,
+    isPublish,
+    contentPost,
+    user_id: req.user._id
   });
   res.status(200).json({message:"Create a Successfuly Posts", createTutorial});
 })
@@ -54,10 +61,10 @@ const updateTutorial = asyncHandler(async (req, res) => {
     throw new Error("Blog Pages not found Please Move to Main menu");
   }
 
-  // if(tutorial.user_id.toString() !== req.user.id){
-  //     res.status(403);
-  //     throw new Error("User don't have permission to update");
-  // }
+  if(tutorial.user_id.toString() !== req.user.id){
+      res.status(403);
+      throw new Error("User don't have permission to update");
+  }
   const updateTutorial = await Tutorial.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -70,18 +77,16 @@ const updateTutorial = asyncHandler(async (req, res) => {
 //@router  DELETE /api/post/delete-post
 //@access private
 const deleteTutorial = asyncHandler(async (req, res) => {
-  debugger
   const tutorial = await Tutorial.findById(req.params.id);
-  if(!tutorial){
+  if(!post){
     res.status(404);
     throw new Error("Data is not found here");
   }
 
-  // if(post.user_id.toString() !== req.user.id){
-  //     res.status(403);
-  //     throw new Error("User don't have permission to update other user Post page");
-  // } 
-
+  if(post.user_id.toString() !== req.user.id){
+      res.status(403);
+      throw new Error("User don't have permission to update other user Post page");
+  } 
   await Tutorial.deleteOne({_id: req.params.id});
   res.status(200).json({message:"The Post has been removed from here successfuly", tutorial});
 });

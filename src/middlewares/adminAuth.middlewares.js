@@ -1,6 +1,6 @@
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
-const User = require("../models/Posts_with_Auth/user.models");
+const User = require("../models/User/user.models");
 
 const adminAccess = asyncHandler(async (req, _, next) => {
     try {

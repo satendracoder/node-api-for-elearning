@@ -20,7 +20,7 @@ app.use(cookieParser());
 
 //routes Links 
 app.use("/api/v1/users", require("./routes/User/user.routes"));
-// app.use('/api/v1/post', require('./routes/post.routes'));
+app.use('/api/v1/tutorial', require('./routes/Tutorial/tutorial.routes'));
 // app.use('/api/v1/category', require('./routes/category.routes'));
 // app.use("/api/v1/tutorial", require("./routes/tutorial.routes"));
 //http://localhost:8080/api/v1/users
