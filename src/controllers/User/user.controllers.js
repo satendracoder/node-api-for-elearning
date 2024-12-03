@@ -3,6 +3,8 @@ const ApiError = require("../../utils/ApiError.js");
 const User = require("../../models/User/user.models.js");
 const uploadOnCloudinary = require("../../utils/cloudunary.js");
 const ApiResponse = require("../../utils/ApiResponse.js");
+const registrationEmailMiddleware = require('../../middlewares/emailMiddleware.js'); // Adjust path as needed
+
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -93,10 +95,20 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Someting went wrong while registering the user");
   }
 
+  // Send registration email using the middleware (it will call next())
+  registrationEmailMiddleware(req, res, () => {
+    debugger
+    return res
+      .status(201)
+      .json(new ApiResponse(200, createUser, "User registered successfully"));
+  });
+ 
   return res
     .status(201)
     .json(new ApiResponse(200, createUser, "User registered Successfully"));
 });
+
+ 
 
 //Login User Controller
 const loginUser = asyncHandler(async (req, res) => {

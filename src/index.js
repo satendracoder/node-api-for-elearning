@@ -1,9 +1,12 @@
 const dotenv = require("dotenv");
 const connectDB = require("./config/indexDB");
+const nodemailer = require('nodemailer');
+
 const app = require("./app");
 
 dotenv.config();
 // make express app
+
 
 //connect to database
 connectDB()
