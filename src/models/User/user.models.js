@@ -5,14 +5,13 @@ const bcrypt = require("bcrypt");
 //Create Schema for User Detailes
 const userSchema = new mongoose.Schema(
   {
-    username: {
-      type: String,
-      required: [false, "username is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      index: true,
-    },
+    // username: {
+    //   type: String,
+    //   required: [false, "username is required"],
+    //   unique: true,
+    //   lowercase: true,
+    //   trim: true,
+    // },
     email: {
       type: String,
       required: [true, "email is required"],
@@ -53,6 +52,16 @@ const userSchema = new mongoose.Schema(
     },
     refreshToken: {
       type: String,
+    },
+
+    // New fields for password reset functionality
+    resetPasswordToken: {
+      type: String,
+      default: null, // Initially null
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null, // Initially null
     },
   },
   { timestamps: true }

@@ -4,12 +4,14 @@ const User = require("../../models/User/user.models.js");
 const uploadOnCloudinary = require("../../utils/cloudunary.js");
 const ApiResponse = require("../../utils/ApiResponse.js");
 const registrationEmailMiddleware = require('../../middlewares/emailMiddleware.js'); // Adjust path as needed
-
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+const bcrypt = require("bcrypt");
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
-      const user = await User.findById(userId);
-       if (!user) {
+    const user = await User.findById(userId);
+    if (!user) {
       throw new ApiError(404, "User not found");
     }
     const accessToken = user.generateAccessToken();
@@ -102,13 +104,13 @@ const registerUser = asyncHandler(async (req, res) => {
       .status(201)
       .json(new ApiResponse(200, createUser, "User registered successfully"));
   });
- 
+
   return res
     .status(201)
     .json(new ApiResponse(200, createUser, "User registered Successfully"));
 });
 
- 
+
 
 //Login User Controller
 const loginUser = asyncHandler(async (req, res) => {
@@ -119,9 +121,9 @@ const loginUser = asyncHandler(async (req, res) => {
   //access token and refresh token generate
   //send cookie
 
-  const {fullName, email, phone, password } = req.body;
+  const { fullName, email, phone, password } = req.body;
 
-  if (!phone && !email ) {
+  if (!phone && !email) {
     throw new ApiError(400, "phone or email is required");
   }
 
@@ -194,7 +196,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    debugger
+  debugger
   const incomingRefreshToken =
     req.cookies.refreshToken || req.body.refreshToken;
 
@@ -218,16 +220,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Refresh token is expired or used");
     }
 
-       const { accessToken, newRefreshToken } =
-          await generateAccessAndRefereshTokens(user._id);
-      
+    const { accessToken, newRefreshToken } =
+      await generateAccessAndRefereshTokens(user._id);
+
     const options = {
       httpOnly: true,
-        secure: true,
+      secure: true,
       sameSite: "strict",
     };
 
-   
+
 
     return res
       .status(200)
@@ -270,9 +272,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email} = req.body;
+  const { fullName, email } = req.body;
 
-  if (!fullName || !email ) {
+  if (!fullName || !email) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -292,18 +294,87 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Account details updated successfully"));
 });
 
+
 const resetPasswordWithEmail = asyncHandler(async (req, res) => {
-  const {email} = req.body;
+  const { email } = req.body;
+
+  // Validate email input
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
   try {
-    const user = await User.findOne({email});
-    if(!user){
-      return res.status(404).json({message: 'User not found' })
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    // Generate a reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Configure nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com', // SMTP server
+      port: 587,              // TLS port (587)
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,   // Use the email stored in the .env file
+        pass: process.env.EMAIL_PASS,   // Use the generated app password
+      },
+    });
+
+    // Email options
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: 'Password Reset Request',
+      text: `You requested a password reset. Please click the following link to reset your password:
+      ${process.env.CLIENT_URL}/reset-password/${resetToken}`,
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
     res.json({ message: 'Reset email sent successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+const resetPasswordwithtoken = asyncHandler(async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  console.log("jhgj", token, newPassword)
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  const user = await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() }, // Check if the token has expired
+  });
+
+  if (!user) {
+    return res.status(400).json({ message: 'Invalid or expired token' });
+  }
+
+  // Hash the new password
+  const bcrypt = require('bcrypt');
+  user.password = await bcrypt.hash(newPassword, 10);
+
+  // Clear the reset token and expiry
+  user.password = newPassword; // This will trigger the pre("save") hook to hash the password1
+  user.resetPasswordToken = null;
+  user.resetPasswordExpires = null;
+
+  await user.save();
+  res.json({ message: 'Password has been reset successfully' });
 });
 
 //export modules while files
@@ -316,4 +387,5 @@ module.exports = {
   resetPasswordWithEmail,
   getCurrentUser,
   updateAccountDetails,
+  resetPasswordwithtoken
 };

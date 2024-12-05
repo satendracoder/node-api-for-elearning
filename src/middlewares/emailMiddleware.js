@@ -2,11 +2,11 @@ const { sendRegistrationEmail } = require('../utils/emailService.js');
 
 // Middleware function to send registration email
 const registrationEmailMiddleware = async (req, res, next) => {
-  const {email, fullName  } = req.body;
-   console.log("Data:", email, fullName);
+  const {email, fullName, phone } = req.body;
+   console.log("Data:", email, fullName, phone);
   try {
     // Send registration email
-    await sendRegistrationEmail(email, fullName);
+    await sendRegistrationEmail(email, fullName, phone);
     console.log(`Registration email sent to ${email}`);
     console.log("right",email, fullName)
     // Proceed to the next middleware or controller (in your case, registration response)
