@@ -19,8 +19,8 @@ const AllGetDetailsubTutorial = asyncHandler(async (req, res) => {
 //@router  POST /api/post/create-post
 //@access private
 const createDetailsubTutorial = asyncHandler(async (req, res) => {
-  const {title,description, tutorial_id} = req.body;
-  if([title,description,tutorial_id].some((filed)=>filed?.trim()==="")){
+  const {title,content,subTutorial_id,description, Keyword} = req.body;
+  if([title,content,subTutorial_id,description, Keyword].some((filed)=>filed?.trim()==="")){
     res.status(400).json({message:"Please check all filed", createDetailsubTutorial})
     throw new ApiError(400, "All fields are required");
   }
@@ -34,8 +34,10 @@ const createDetailsubTutorial = asyncHandler(async (req, res) => {
 
   const detailsubtutorial = await DetailSubTutorial.create({
     title,
+    content,
+    subTutorial_id,
     description,
-    tutorial_id
+    Keyword
   });
   res.status(200).json({message:"Create a Successfuly Posts", detailsubtutorial});
 })

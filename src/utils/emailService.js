@@ -19,8 +19,9 @@ const transporter = nodemailer.createTransport({
 // Function to send registration email
 const sendRegistrationEmail = async (email, fullName, phone) => {
  
+
  const mailOptions ={
-    from:`"Ssbr iNet", ${process.env.EMAIL_USER}`, // Sender's email
+    from:`"${"Ssbr iNet.."}" <${process.env.EMAIL_USER}>`, // Sender's email
     to:email,                          // Recipient email (dynamic)
     subject: 'Registration Successful',
    // HTML email content with inline CSS
@@ -51,12 +52,23 @@ const sendRegistrationEmail = async (email, fullName, phone) => {
         .header {
             background-color: #26a69a;
             color: white;
-            padding: 10px;
+            padding: 1px 10px;
             font-size:16px;
             text-align: center;
         }
         .content {
             padding: 20px;
+        }
+            .social-icons {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .social-icons svg {
+            margin: 0 5px;
+            width: 32px;
+            height: 32px;
+            display: inline-block;
         }
         .footer {
             padding: 5px 10px;
@@ -75,10 +87,10 @@ const sendRegistrationEmail = async (email, fullName, phone) => {
 
     <div class="container">
         <div class="header">
-            <h1>Welcome to Ssbr iNet.!</h1>
+            <h2>Welcome to Ssbr iNet...</h2>
         </div>
         <div class="content">
-            <h2>Your Registration is Successful!</h2>
+            <h3>Your Registration is Successful!</h3>
             <p>Dear ${fullName},</p>
             <p>Thank you for registering with us! We’re thrilled to have you as part of our community.</p>
             <p><strong>Your Account Details:</strong></p>
@@ -92,6 +104,26 @@ const sendRegistrationEmail = async (email, fullName, phone) => {
             <p>If you have any questions or need assistance, don’t hesitate to reach out to our support team at info@ssbrinet.com. We’re here to help!</p>
             <p>Thank you for joining Ssbr iNet. We look forward to serving you!</p>
         </div>
+
+<!-- Social Media Icons -->
+        <div class="social-icons">
+            <a href="https://linkedin.com/ssbrinet" target="_blank">
+                <img src="/assets/images/linkedin-brands-solid.svg" alt="LinkedIn">
+            </a>
+            <a href="https://github.com/ssbrinet" target="_blank">
+                <img src="/assets/images/github-brands-solid.svg" alt="GitHub">
+            </a>
+            <a href="https://facebook.com/ssbrinet" target="_blank">
+                <img src="/assets/images/facebook-brands-solid.svg" alt="Facebook">
+            </a>
+            <a href="https://instagram.com/ssbrinet" target="_blank">
+                <img src="/assets/images/instagram-brands-solid.svg" alt="Instagram">
+            </a>
+            <a href="https://twitter.com/ssbrinet" target="_blank">
+                <img src="/assets/images/twitter-brands-solid.svg" alt="Twitter">
+            </a>
+        </div>
+        
         <div class="footer">
             <p>&copy; 2019-2024 Ssbr iNet. All rights reserved.</p>
         </div>

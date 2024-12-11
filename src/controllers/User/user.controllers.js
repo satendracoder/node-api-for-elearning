@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const asyncHandler = require("../../utils/asyncHandler.js");
 const ApiError = require("../../utils/ApiError.js");
 const User = require("../../models/User/user.models.js");
@@ -7,6 +9,9 @@ const registrationEmailMiddleware = require('../../middlewares/emailMiddleware.j
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const bcrypt = require("bcrypt");
+
+
+
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -316,6 +321,26 @@ const resetPasswordWithEmail = asyncHandler(async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
+    // Correct relative path to reset-password.html from the "public/templates" folder
+    const templatePath = path.join(__dirname, '..', '..', '..', 'public', 'templates', 'reset-password.html')
+    // console.log("templatePath",templatePath)
+    // Check if the file exists
+    if (!fs.existsSync(templatePath)) {
+      return res.status(500).json({ message: 'HTML template file not found' });
+    }
+    // console.log("templatePath",templatePath)
+    let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+
+     // Extract full name from user object
+    const fullName = `${user.fullName}`;
+
+    // Replace placeholders in the HTML template
+    emailTemplate = emailTemplate
+       .replace(/{{fullName}}/g, fullName)  // Replace full name placeholder
+      .replace(/{{resetToken}}/g, resetToken)
+      .replace(/{{resetLink}}/g, `${process.env.CORS_ORIGIN}/reset-password/${resetToken}`);
+
+
     // Configure nodemailer transporter
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com', // SMTP server
@@ -327,14 +352,16 @@ const resetPasswordWithEmail = asyncHandler(async (req, res) => {
       },
     });
 
-    // Email options
+
+    // Define email options
     const mailOptions = {
-      from: process.env.EMAIL,
+      from: `"${"Ssbr iNet.."}" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Password Reset Request',
-      text: `You requested a password reset. Please click the following link to reset your password:
-      ${process.env.CLIENT_URL}/reset-password/${resetToken}`,
+      html: emailTemplate,
     };
+
+
 
     // Send email
     await transporter.sendMail(mailOptions);
