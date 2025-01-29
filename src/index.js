@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 const app = require("./app");
 
 dotenv.config();
-// make express app
+// make express app mujhe kaise pata hoga
 
 
 //connect to database
